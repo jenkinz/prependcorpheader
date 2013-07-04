@@ -6,3 +6,67 @@ relevant data as necessary.
 Usage:  prependcorpheader [--help] [--version]
         prependcorpheader <inputfile> <prependfile>
 
+Spec:
+
+The program shall have 2 operating modes.
+
+-- Mode 1: Version and/or help information --
+
+The program shall print version and/or help (usage) information to stdout when 
+the command line arguments `--version' and/or `--help', respectively, are passed 
+to the program. If either one of these flags is provided, the program shall exit 
+after displaying the information, returning a 0 (zero) exit status to the 
+caller.
+
+-- Mode 2: Normal operating mode --
+
+"Normal operating mode" is defined as when the version and help arguments 
+are not given to the program as described in Mode 1, and two file names are 
+passed to the program instead. 
+
+In this case, the first file name passed shall be considered the "inputfile" and
+the second file passed shall be considered the "prependfile." 
+
+The "inputfile" is the file that will be read from for the corporate header 
+template.
+
+The "prependfile" is the file that will be modified. Text from the "inputfile" 
+will be transformed and then prepended onto the "prependfile." If "prependfile"
+has an existing corporate header, it will first be deleted.
+
+If any more or less than 2 arguments are supplied, or if any other flag 
+arguments beginning with '-' are passed, the program shall exit and display an 
+error message to stdout, as well as return a non-zero exit status to the caller.
+
+If "inputfile" cannot be opened in read-only mode, the program shall exit and
+display an error message to stdout, as well as return a non-zero exit status to 
+the caller.
+
+If "prependfile" cannot be opened in read/write mode, the program shall exit and
+display an error message to stdout, as well as return a non-zero exit status to 
+the caller.
+
+The program shall read in the entire contents of "inputfile." The program 
+shall validate the contents of "inputfile" by ensuring that it conforms to a C-
+style comment block (/* ... */). If the contents do not validate, an error 
+message shall be printed to stdout, and the program shall exit returning a 
+non-zero exit status to the caller.
+
+The program shall parse the contents read from "inputfile" and replace all
+occurances of the following expressions as indicated:
+
+$date - the current date fomatted as MM/dd/YYYY
+$file - the name of "prependfile"
+
+The program shall delete the first C-style comment block from "prependfile" it
+finds. The comment may span multiple lines. The comment must be the first text 
+that appears in "prependfile." If this condition is not met, the program shall 
+not delete any text from "prependfile."
+
+The program shall prepend the transformed text read from "inputfile" to 
+"prependfile." The program shall display a completion message, close the 
+"inputfile," save and close the "prependfile," and return an exit status of 0
+(zero) to the caller if the previous operations were successful. Otherwise, the
+program shall display an error message to stdout and return a non-zero exit 
+status to the caller.
+
