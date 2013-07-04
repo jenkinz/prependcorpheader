@@ -1,0 +1,4 @@
+prependcorpheader
+*.o
+in
+out
