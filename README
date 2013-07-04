@@ -1,0 +1,8 @@
+Prepend Corporate Header
+
+Prepends a corporate header from a template file to a given file, updating 
+relevant data as necessary.
+
+Usage:  prependcorpheader [--help] [--version]
+        prependcorpheader <inputfile> <prependfile>
+
