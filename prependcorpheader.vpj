@@ -214,9 +214,13 @@
         <Folder
             Name="Other Files"
             Filters="">
+            <F N=".gitignore"/>
+            <F N="README"/>
+            <F N="in"/>
             <F
                 N="makefile"
                 Type="Makefile"/>
+            <F N="out"/>
         </Folder>
     </Files>
 </Project>
