@@ -16,7 +16,7 @@ using namespace std;
 
 namespace {
 
-const char * const versionStr = "0.0.1";
+const char * const versionStr = "0.0.2";
 
 // Command line arg variables
 bool helpSet = false;
@@ -25,6 +25,15 @@ string inputFilename;
 string prependFilename;
 
 // Utility functions
+
+/**
+ * Remove extension from a filename 
+ *  
+ * @param s the filename
+ * @param delim the extension delimeter
+ * 
+ * @return string the filename stripped of its extension
+ */
 string stripext(const string& s, const char * delim = ".")
 {
     string s2(s);
@@ -35,6 +44,14 @@ string stripext(const string& s, const char * delim = ".")
 
 }
 
+/**
+ * Remove path from a filename. 
+ *  
+ * @param s the filename
+ * @param delim the path-separator
+ * 
+ * @return string the filename stripped of its path
+ */
 string strip2file(const string& s, const char * delim = "/\\")
 {
     string s2(s);
@@ -45,6 +62,13 @@ string strip2file(const string& s, const char * delim = "/\\")
 
 }
 
+/**
+ * Remove path and extension from a filename.
+ *  
+ * @param s the filename
+ * 
+ * @return string the stripped filename
+ */
 string strip2base(const string& s)
 {
     string s2(s);
@@ -54,12 +78,23 @@ string strip2base(const string& s)
 }
 
 // Command line functions
+
+/**
+ * Prints the program's version information to stdout. 
+ * 
+ * @param prog 
+ */
 void version(const string& prog)
 {
     cout << prog << " version " << versionStr << " by Brian Jenkins"
          << endl << endl;
 }
 
+/**
+ * Prints the program's usage information to stdout. 
+ * 
+ * @param prog the name of the program
+ */
 void help(const string& prog)
 {
     cout << "usage:" 
@@ -67,6 +102,12 @@ void help(const string& prog)
             << "\t\t" << prog << " <inputfile> <prependfile>" << endl;
 }
 
+/**
+ * Parses the command line arguments into variables. 
+ * 
+ * @param argc the arg count
+ * @param argv the arg values
+ */
 void options(int argc, char *argv[])
 {
     const string& prog = strip2base(argv[0]);
@@ -130,12 +171,18 @@ void options(int argc, char *argv[])
     #endif
 }
 
-// Compare file1 to file2 based on a template regex.
+/** 
+ * Compare file1 to file2 based on a template regex. 
+ *  
+ * @param file1 the file to compare 
+ * @param file2 the file to compare file1 against 
+ * @todo 
+ */
 // Return true if file1 needs updating depending on file2.
 bool compareHdrContents(const ios *file1, const ios *file2)
 {
     bool updateNeeded = true;
-
+#if 0
     #ifdef DEBUG
     cout << "Comparing headers to see if file1 needs updating...";
     cout << " TODO!" << endl;
@@ -143,134 +190,69 @@ bool compareHdrContents(const ios *file1, const ios *file2)
     cout << "file1: " << file1->rdbuf();
     cout << "file2: " << file2->rdbuf();
     #endif
-
+#endif
     return updateNeeded;
 }
 
 } // end anonymous namespace
 
+/**
+ * Main entry point. 
+ * 
+ * @param argc 
+ * @param argv 
+ * 
+ * @return int 0 if succesful; non-zero if unsuccessful
+ */
 int main(int argc, char *argv[])
 {
     options(argc, argv);
 
-    ifstream *inputFile = new ifstream(inputFilename.c_str(), ios_base::in);
-    if (!(*inputFile)) {
+    ifstream inputFile;
+    inputFile.open(inputFilename.c_str(), ios_base::in);
+     if (!inputFile.is_open()) {
         cout << "file: `" << inputFilename << "' not found!" << endl;
-        delete inputFile;
         return -1;
     }
 
-    ofstream *prependFile = new ofstream(prependFilename.c_str(),
-                                         ios_base::in|ios_base::out);
-    if (!(*prependFile)) {
+    fstream prependFile;
+    prependFile.open(prependFilename.c_str(), ios_base::in|ios_base::out);
+    if (!prependFile.is_open()) {
         cout << "file: `" << prependFilename << "' not found!" << endl;
-        delete prependFile;
         return -1;
     }
 
-    bool updateNeeded = compareHdrContents(prependFile, inputFile);
+    bool updateNeeded = compareHdrContents(&prependFile, &inputFile);
 
     if (!updateNeeded) {
         cout << "`" << prependFilename 
                     << "' corporate header is up-to-date" << endl;
     }
     else {
-        cout << "`" << prependFilename << "' is out-of-date. Updating..." 
+        cout << "Updating `" << prependFilename << "'..." 
              << endl;
-        // TODO read inputFile's template contents, transform with current data
-        // (e.g. current date) and prepend to prependFile....
-        cout << "Done." << endl;
+        
+        string temp;        
+        string templateContents;
+        while(getline(inputFile, temp)) {
+            templateContents.append(temp);
+        }
 
         #ifdef DEBUG
-        cout << "updated prependFile: " << prependFile->rdbuf();
+        cout <<  "templateContents is: " << endl << templateContents << endl;
         #endif
+
+        // TODO validate templateContents agains C-style comment regex
+        // TODO delete first C-style comment block from prependFile
+        // TODO transform templateContents with relevant data
+        // TODO prepend templateContents onto prependFile
+
+        cout << "Done." << endl;
     }
 
-    delete inputFile;
-    delete prependFile;
+    inputFile.close();
+    prependFile.close();
 
     return 0;
-
-#if 0
-    // Equivalent to while (std::cin >> token) { insert token into vector }
-    std::vector<std::string> tokens;
-    std::istream * input = &std::cin;
-    std::ifstream * in = 0;
-    if (!inputfile.empty()) {
-        in = new std::ifstream(inputfile.c_str());
-        if (!(*in)) {
-            std::cout << "file: " << inputfile << " not found!" << std::endl;
-            help(argv[0]);
-            delete in;
-            return -1;
-        }
-        input = in;
-        stdin_used = false;     // std::in is implied, this isn't necessary
-    }
-
-    std::istream_iterator<std::string> file_iter(*input), end_of_stream;
-    std::copy(file_iter, end_of_stream, std::back_inserter(tokens));
-
-    typedef std::set<unsigned> DictValue;
-    typedef std::map<std::string, DictValue> DictType;
-    DictType dict;
-    const int N = tokens.size();
-    assert(N > 0);
-    for (int i = 0; i < N; ++i) {
-        const std::string token(tokens[i]);
-        // std::cout << "vector token = " << token << std::endl;
-        const std::string tok = transform_token(token);
-        DictType::iterator it =  dict.find(tok);
-
-        // if found in dictionary, test, filter, and add to set of indexes
-        // indicating number of duplicates.
-        // Otherwise - its a new entry and add to the dictionary to allow for
-        // testing for any other duplicates that may occur later in the vector
-        if (it != dict.end()) {
-            // stripped filename found - insert index into value set subject
-            // to the filter iterating over the set where set has more than
-            // 1 entry - assertion of relationship between map and set
-            // that is set has N entries
-            assert(it->second.size() >= 1);
-            const bool isdup = dupfilename_filter(i, tokens, it->second);
-            if (isdup)
-                it->second.insert(i);
-        }
-        else {
-            // insert unique pathless filename into dictionary for later
-            // lookup qualification.
-            DictValue v; 
-            v.insert(i);
-            dict.insert(DictType::value_type(tok, v));
-        }
-    } // end for
-
-    // Find duplicates if any and print out
-    int dups_found = 0, dup_pairs_found = 0;
-    for (DictType::iterator it = dict.begin(); it != dict.end(); ++it) {
-        if (it->second.size() > 1) {
-            if (dups_found == 0) { 
-                std::cout << "Duplicates Found: "
-                          << "  => Exact match or suffix match equivalency"
-                          << "\n-----------------\n";
-            }
-            dups_found += it->second.size();    
-            ++dup_pairs_found;
-            for (DictValue::iterator i = it->second.begin(); 
-                 i != it->second.end(); ++i) {
-                const std::string& dup = tokens[*i];
-                std::cout << '\t' << dup << "\n";
-            }
-            std::cout << std::endl;
-        }
-    }
-
-    delete in;
-    if (dup_pairs_found)
-        std::cout << "duplicate pairs found = " << dup_pairs_found << std::endl;
-    return dups_found;  // or return dup_pairs_found;
-
-#endif
-
 } // end main
 
