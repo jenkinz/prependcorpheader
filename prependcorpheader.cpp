@@ -11,12 +11,13 @@
 #include <string>
 #include <cstdlib>
 #include <fstream>
+//#include <regex>
 
 using namespace std;
 
 namespace {
 
-const char * const versionStr = "0.0.2";
+const char * const versionStr = "0.0.3";
 
 // Command line arg variables
 bool helpSet = false;
@@ -77,7 +78,7 @@ string strip2base(const string& s)
     return s2;
 }
 
-// Command line functions
+// Command line arg processing functions
 
 /**
  * Prints the program's version information to stdout. 
@@ -171,6 +172,8 @@ void options(int argc, char *argv[])
     #endif
 }
 
+// PCH functions
+
 /** 
  * Compare file1 to file2 based on a template regex. 
  *  
@@ -178,18 +181,17 @@ void options(int argc, char *argv[])
  * @param file2 the file to compare file1 against 
  * @todo 
  */
-// Return true if file1 needs updating depending on file2.
 bool compareHdrContents(const ios *file1, const ios *file2)
 {
     bool updateNeeded = true;
 #if 0
-    #ifdef DEBUG
+#ifdef DEBUG
     cout << "Comparing headers to see if file1 needs updating...";
     cout << " TODO!" << endl;
 
     cout << "file1: " << file1->rdbuf();
     cout << "file2: " << file2->rdbuf();
-    #endif
+#endif
 #endif
     return updateNeeded;
 }
@@ -229,23 +231,45 @@ int main(int argc, char *argv[])
                     << "' corporate header is up-to-date" << endl;
     }
     else {
-        cout << "Updating `" << prependFilename << "'..." 
-             << endl;
+        cout << "Updating `" << prependFilename << "'..." << endl;
         
         string temp;        
         string templateContents;
         while(getline(inputFile, temp)) {
-            templateContents.append(temp);
+            templateContents.append(temp + "\n");
         }
 
         #ifdef DEBUG
-        cout <<  "templateContents is: " << endl << templateContents << endl;
+        cout <<  "templateContents after read is: " << endl << templateContents 
+             << endl;
         #endif
 
+#if 0
         // TODO validate templateContents agains C-style comment regex
+        regex templateRegex ("\\/\\*([^*]|[\\r\\n]|(\\*+([^*\\/]|[\\r\\n])))*\\*+\\/");
+        if (!regex_match(templateContents, templateRegex)) {
+            cout << "file: `" << prependFilename << "' does not contain a "
+                              "valid C-style comment which is required for the "
+                              "corporate header." << endl;
+        }
+#endif
+
         // TODO delete first C-style comment block from prependFile
         // TODO transform templateContents with relevant data
-        // TODO prepend templateContents onto prependFile
+
+        // prepend templateContents onto prependFile
+        string prependFileContents;
+        while (getline(prependFile, temp)) {
+            prependFileContents.append(temp + "\n");
+        }
+
+        prependFileContents = templateContents + prependFileContents;
+
+        #ifdef DEBUG
+        cout << "prependFileContents after update is: " << endl 
+             << prependFileContents
+             << endl;
+        #endif
 
         cout << "Done." << endl;
     }
