@@ -204,7 +204,8 @@
         </Folder>
         <Folder
             Name="Header Files"
-            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"/>
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
+        </Folder>
         <Folder
             Name="Resource Files"
             Filters="*.ico;*.cur;*.dlg"/>
