@@ -55,8 +55,10 @@ non-zero exit status to the caller.
 The program shall parse the contents read from "inputfile" and replace all
 occurances of the following expressions as indicated:
 
-$date - the current date fomatted as MM/dd/YYYY
-$file - the name of "prependfile"
+%date% - the current date fomatted as MM/dd/YYYY
+%file% - the name of "prependfile"
+
+To use the literal character '%', escape it so it's '%%'.
 
 The program shall delete the first C-style comment block from "prependfile" it
 finds. The comment may span multiple lines. The comment must be the first text 

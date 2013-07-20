@@ -13,6 +13,8 @@
 #include <fstream>
 //#include <regex>
 
+#define DEBUG
+
 using namespace std;
 
 namespace {
@@ -100,7 +102,7 @@ void help(const string& prog)
 {
     cout << "usage:" 
             << "\t"   << prog << " [--help] [--version]" << endl
-            << "\t\t" << prog << " <inputfile> <prependfile>" << endl;
+            << "\t" << prog << " <inputfile> <prependfile>" << endl;
 }
 
 /**
@@ -142,7 +144,7 @@ void options(int argc, char *argv[])
                     prependFilename = tmpStr;
                 }
                 else {
-                    cout << "option: " << argv[i] << " not recognized!" << endl;
+                    cerr << "option: " << argv[i] << " not recognized!" << endl;
                     exit(0);
                 }
                 ++fileCnt;
@@ -160,7 +162,7 @@ void options(int argc, char *argv[])
         exit(0);
     }
     else if (inputFilename.empty() || prependFilename.empty()) {
-        cout << "Too few arguments - <inputfile> and <prependfile> required" 
+        cerr << "Too few arguments - <inputfile> and <prependfile> required" 
              << endl;
         help(prog);
         exit(0);
@@ -213,14 +215,14 @@ int main(int argc, char *argv[])
     ifstream inputFile;
     inputFile.open(inputFilename.c_str(), ios_base::in);
      if (!inputFile.is_open()) {
-        cout << "file: `" << inputFilename << "' not found!" << endl;
+        cerr << "file: `" << inputFilename << "' not found!" << endl;
         return -1;
     }
 
     fstream prependFile;
     prependFile.open(prependFilename.c_str(), ios_base::in|ios_base::out);
     if (!prependFile.is_open()) {
-        cout << "file: `" << prependFilename << "' not found!" << endl;
+        cerr << "file: `" << prependFilename << "' not found!" << endl;
         return -1;
     }
 
@@ -232,38 +234,84 @@ int main(int argc, char *argv[])
     }
     else {
         cout << "Updating `" << prependFilename << "'..." << endl;
-        
-        string temp;        
+     
+		char c;
+		bool reading = false;
+		//bool readingReplToken = false;
+		//string replaceToken;
         string templateContents;
-        while(getline(inputFile, temp)) {
-            templateContents.append(temp + "\n");
+
+		while ((c = inputFile.get()) != EOF) {
+			if (c == '/' && inputFile.peek() == '*') {
+				reading = true;
+			}
+
+			if (reading) {
+				
+				/*
+				if (c == '%' && inputFile.peek() != '%') {
+					readingReplToken = true;
+					continue;
+				}
+
+				if (readingReplToken) {
+					replaceToken.append(1, c);
+					
+					if (inputFile.peek() == '%') {
+						// Do the replacement...
+						if (replaceToken == "DATE") {
+							templateContents.append("brian_date");
+						}
+						inputFile.get(); // get rid of closing '%'
+						readingReplToken = false; 
+						replaceToken = "";
+						break;
+					}
+					
+					continue;
+				} 
+				*/ 
+
+				templateContents.append(1, c);
+			}
         }
 
-        #ifdef DEBUG
+		#ifdef DEBUG
         cout <<  "templateContents after read is: " << endl << templateContents 
              << endl;
         #endif
 
-#if 0
-        // TODO validate templateContents agains C-style comment regex
-        regex templateRegex ("\\/\\*([^*]|[\\r\\n]|(\\*+([^*\\/]|[\\r\\n])))*\\*+\\/");
-        if (!regex_match(templateContents, templateRegex)) {
-            cout << "file: `" << prependFilename << "' does not contain a "
-                              "valid C-style comment which is required for the "
-                              "corporate header." << endl;
-        }
-#endif
-
-        // TODO delete first C-style comment block from prependFile
-        // TODO transform templateContents with relevant data
-
-        // prepend templateContents onto prependFile
+		size_t counter = 0;
+		bool readingFirstComment = false;
+		bool firstCharRead = false;
         string prependFileContents;
-        while (getline(prependFile, temp)) {
-            prependFileContents.append(temp + "\n");
-        }
+		prependFileContents.append(templateContents);
 
-        prependFileContents = templateContents + prependFileContents;
+        while ((c = prependFile.get()) != EOF) {
+			if (counter == 0 && c == '/' && prependFile.peek() == '*') {
+				readingFirstComment = true;
+			}
+
+			++counter;
+
+			if (!firstCharRead) {
+				if (c == ' ') {
+					continue;
+				}
+
+				firstCharRead = true;
+			}
+
+			if (readingFirstComment) { // keep ignoring 1st comment until */
+				if (c == '*' && prependFile.peek() == '/') {
+					prependFile.get(); // get rid of the '/'
+					readingFirstComment = false;
+				}
+				continue;
+			}
+			
+            prependFileContents.append(1, c); // append rest of file contents
+        }
 
         #ifdef DEBUG
         cout << "prependFileContents after update is: " << endl 
