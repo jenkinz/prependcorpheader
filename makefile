@@ -6,51 +6,23 @@
 # Date: July 4, 2013
 #
 
-XCFLAGS ?=
+NAME = prependcorpheader
 
-%if "$(OS,LC)" == "nt"
-%setenv PATH=c:\bcc55\bin;$(PATH)
-E = .exe
-O = obj
-CC = bcc32
-DEBUG = -v
-LDFLAGS = $(DEBUG)
-XCLEANMASK = *.tr2 *.tds
-LP = .\\
-
-%elif "$(OS,LC)" == "unix"
-E = 
-O = o
 CC = g++
+CFLAGS = -pedantic -Wall
+
 LD = $(CC)
-DEBUG = -DDEBUG=1
-LDFLAGS = $(DEBUG) -o $@
-XCLEANMASK =
-LP = ./
+LFLAGS = $(CFLAGS)
 
-%else
-%error OS=$(OS) is not recognized!
-%endif
+SRCS = $(NAME).cpp
+OBJS = $(NAME).o
 
-IMAGE = $(LP)prependcorpheader
+$(NAME) : $(OBJS)
+	$(LD) $(LFLAGS) -o $(NAME) $<
 
-CFLAGS = $(DEBUG) -pedantic -Wall
-LD = $(CC)
-OBJS = $(IMAGE,R,>.$O)
+$(OBJS) : $(SRCS)
+	$(CC) $(CFLAGS) -c $<
 
-$(IMAGE)$E : $(OBJS)  
-	%echo Linking $@
-	>$(LD) $(LDFLAGS) $^
-
-.cpp.$O :
-	%echo Compiling $<
-	>$(CC) $(CFLAGS) $(XCFLAGS) -c $<	
-
-compile .ALWAYS :
-	$(MAKE) $(tgt).$O
-
-clean .ALWAYS :
-	--rm *.$O $(IMAGE)$E 
-
-$(OBJS) : $(MAKEFILE)
+clean:
+	rm $(NAME) $(NAME).o
 	
