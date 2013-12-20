@@ -9,7 +9,7 @@
 NAME = prependcorpheader
 
 CC = g++
-CFLAGS = -pedantic -Wall
+CFLAGS = -Wall -pedantic
 
 LD = $(CC)
 LFLAGS = $(CFLAGS)

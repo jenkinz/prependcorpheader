@@ -19,7 +19,7 @@ using namespace std;
 
 namespace {
 
-const char * const versionStr = "0.0.3";
+const char * const versionStr = "0.0.1";
 
 // Command line arg variables
 bool helpSet = false;
