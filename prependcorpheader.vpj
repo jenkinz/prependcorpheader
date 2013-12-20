@@ -19,7 +19,7 @@
                 Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine="/opt/opus/bins/omake"/>
+                <Exec CmdLine="make"/>
             </Target>
             <Target
                 Name="Rebuild"
@@ -28,7 +28,7 @@
                 Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine="/opt/opus/bins/omake -a"/>
+                <Exec CmdLine="make --always-make"/>
             </Target>
             <Target
                 Name="Compile"
@@ -115,7 +115,7 @@
                 Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine="/opt/opus/bins/omake"/>
+                <Exec CmdLine="make"/>
             </Target>
             <Target
                 Name="Rebuild"
@@ -124,7 +124,7 @@
                 Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine="/opt/opus/bins/omake -a"/>
+                <Exec CmdLine="make --always-make"/>
             </Target>
             <Target
                 Name="Compile"
